@@ -101,6 +101,8 @@ class EmailService:
 
             part1 = MIMEText(text_content, "plain", "utf-8")
             part2 = MIMEText(html_content, "html", "utf-8")
+            message.attach(part1)
+            message.attach(part2)
 
             await aiosmtplib.send(
                 message,
