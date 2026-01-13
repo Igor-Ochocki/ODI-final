@@ -1,0 +1,49 @@
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Test files
+tests/
+*.test.py
+*_test.py
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Development files
+*.md
+.git/
+.gitignore
+.env*.local
+
+# IDE
+.vscode/
+.idea/
+
+# Data (will be mounted as volume)
+data/
+attachments/
+*.db
+*.sqlite
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

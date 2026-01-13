@@ -1,0 +1,74 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    container_name: odi-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - odi-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: odi-backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=sqlite:///./data/odi.db
+      - SECRET_KEY=${SECRET_KEY:-change-this-in-production-use-64-random-chars}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change-this-jwt-secret-key-64-chars}
+      - CSRF_SECRET_KEY=${CSRF_SECRET_KEY:-change-this-csrf-secret-key}
+      - MAIL_SERVER=${MAIL_SERVER:-smtp.gmail.com}
+      - MAIL_PORT=${MAIL_PORT:-587}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+      - MAIL_FROM=${MAIL_FROM:-noreply@example.com}
+      - FRONTEND_URL=${FRONTEND_URL:-https://localhost}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+    volumes:
+      - backend_data:/app/data
+      - backend_attachments:/app/attachments
+    expose:
+      - "8000"
+    networks:
+      - odi-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: odi-frontend
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://localhost/api}
+      - NODE_ENV=production
+    expose:
+      - "3000"
+    networks:
+      - odi-network
+    depends_on:
+      - backend
+
+volumes:
+  caddy_data:
+  caddy_config:
+  backend_data:
+  backend_attachments:
+
+networks:
+  odi-network:
+    driver: bridge
